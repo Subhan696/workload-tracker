@@ -60,7 +60,9 @@ class AssignmentViewSet(viewsets.ModelViewSet):
     - DELETE /api/assignments/<id>/ (Delete assignment)
     """
 
-    queryset = Assignment.objects.select_related("employee__department").all()
+    queryset = (
+        Assignment.objects.select_related("employee__department").order_by("-id")
+    )
     serializer_class = AssignmentSerializer
     permission_classes = [permissions.IsAuthenticated, IsSameDepartmentOrReadOnly]
 

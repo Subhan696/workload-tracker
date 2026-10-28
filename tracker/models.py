@@ -52,7 +52,7 @@ class Assignment(models.Model):
     )
 
     class Meta:
-        ordering = ["id"]
+        ordering = ["-id"]
 
     def __str__(self):
         return f"[{self.status}] {self.title} ({self.hours}h) -> {self.employee.name}"

@@ -93,7 +93,8 @@ export default function App() {
 
   // Handle creating new assignment (POST)
   const handleCreateAssignment = async (newAssignmentData) => {
-    await createAssignment(newAssignmentData, currentUser.token, addTrace);
+    const created = await createAssignment(newAssignmentData, currentUser.token, addTrace);
+    setAssignments((prev) => [created, ...prev.filter((a) => a.id !== created.id)]);
     await loadData();
   };
 
