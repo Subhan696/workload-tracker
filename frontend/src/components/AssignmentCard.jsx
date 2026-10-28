@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 
-export default function AssignmentCard({ assignment, onUpdateHours }) {
+export default function AssignmentCard({ assignment, onUpdate }) {
   const [isEditing, setIsEditing] = useState(false);
   const [hoursInput, setHoursInput] = useState(assignment.hours);
+  const [statusInput, setStatusInput] = useState(assignment.status);
   const [saving, setSaving] = useState(false);
   const [editError, setEditError] = useState(null);
 
@@ -10,7 +11,6 @@ export default function AssignmentCard({ assignment, onUpdateHours }) {
     setEditError(null);
     const parsed = parseFloat(hoursInput);
 
-    // Client-side validation (matching DRF serializer rules)
     if (isNaN(parsed) || parsed < 0) {
       setEditError('Hours cannot be negative.');
       return;
@@ -22,10 +22,13 @@ export default function AssignmentCard({ assignment, onUpdateHours }) {
 
     setSaving(true);
     try {
-      await onUpdateHours(assignment.id, parsed);
+      await onUpdate(assignment.id, {
+        hours: parsed,
+        status: statusInput,
+      });
       setIsEditing(false);
     } catch (err) {
-      setEditError(err.message || 'Failed to update hours');
+      setEditError(err.message || 'Failed to update assignment');
     } finally {
       setSaving(false);
     }
@@ -33,6 +36,7 @@ export default function AssignmentCard({ assignment, onUpdateHours }) {
 
   const handleCancel = () => {
     setHoursInput(assignment.hours);
+    setStatusInput(assignment.status);
     setEditError(null);
     setIsEditing(false);
   };
@@ -72,7 +76,8 @@ export default function AssignmentCard({ assignment, onUpdateHours }) {
 
       {isEditing && (
         <div className="edit-hours-form" id={`edit-form-${assignment.id}`}>
-          <div className="edit-input-row">
+          <div className="edit-input-row" style={{ marginBottom: '8px' }}>
+            <label style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Hours:</label>
             <input
               id={`input-hours-${assignment.id}`}
               type="number"
@@ -80,8 +85,25 @@ export default function AssignmentCard({ assignment, onUpdateHours }) {
               value={hoursInput}
               onChange={(e) => setHoursInput(e.target.value)}
               disabled={saving}
+              style={{ width: '70px' }}
               autoFocus
             />
+
+            <label style={{ fontSize: '11px', color: 'var(--text-muted)', marginLeft: '6px' }}>Status:</label>
+            <select
+              id={`select-status-${assignment.id}`}
+              value={statusInput}
+              onChange={(e) => setStatusInput(e.target.value)}
+              disabled={saving}
+              style={{ fontSize: '11px', padding: '3px 6px' }}
+            >
+              <option value="ACTIVE">ACTIVE</option>
+              <option value="ON_HOLD">ON_HOLD</option>
+              <option value="COMPLETED">COMPLETED</option>
+            </select>
+          </div>
+
+          <div style={{ display: 'flex', gap: '6px' }}>
             <button
               id={`btn-save-${assignment.id}`}
               className="btn-save-sm"
@@ -99,6 +121,7 @@ export default function AssignmentCard({ assignment, onUpdateHours }) {
               Cancel
             </button>
           </div>
+
           {editError && (
             <div className="edit-error-msg" id={`error-msg-${assignment.id}`}>
               Error: {editError}
