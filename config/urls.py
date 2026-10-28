@@ -16,9 +16,20 @@ Including another URLconf
 """
 
 from django.contrib import admin
+from django.contrib.auth import logout
+from django.shortcuts import redirect
 from django.urls import include, path
+
+
+def api_logout(request):
+    """Logs out and redirects directly to the login page to enter new credentials."""
+    logout(request)
+    return redirect("/api-auth/login/?next=/api/assignments/")
+
 
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/", include("tracker.urls")),
+    path("api-auth/logout/", api_logout, name="logout"),
+    path("api-auth/", include("rest_framework.urls")),
 ]
