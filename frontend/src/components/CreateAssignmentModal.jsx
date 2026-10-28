@@ -2,11 +2,20 @@ import React, { useState } from 'react';
 
 export default function CreateAssignmentModal({ isOpen, onClose, employees, onCreated }) {
   const [title, setTitle] = useState('');
-  const [employeeId, setEmployeeId] = useState(employees[0]?.id || '');
+  const [employeeId, setEmployeeId] = useState('');
   const [hours, setHours] = useState('10.0');
   const [status, setStatus] = useState('ACTIVE');
   const [submitting, setSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState(null);
+
+  // Synchronize employeeId when employees list arrives or modal opens
+  React.useEffect(() => {
+    if (employees && employees.length > 0) {
+      if (!employeeId || !employees.some((e) => String(e.id) === String(employeeId))) {
+        setEmployeeId(employees[0].id);
+      }
+    }
+  }, [employees, employeeId, isOpen]);
 
   if (!isOpen) return null;
 
@@ -19,6 +28,16 @@ export default function CreateAssignmentModal({ isOpen, onClose, employees, onCr
       setErrorMsg('Title is required.');
       return;
     }
+
+    const selectedEmpId = employeeId
+      ? parseInt(employeeId, 10)
+      : (employees[0]?.id ? parseInt(employees[0].id, 10) : null);
+
+    if (!selectedEmpId || isNaN(selectedEmpId)) {
+      setErrorMsg('Please select an employee.');
+      return;
+    }
+
     if (isNaN(parsedHours) || parsedHours < 0.5) {
       setErrorMsg('Hours must be at least 0.5.');
       return;
@@ -32,7 +51,7 @@ export default function CreateAssignmentModal({ isOpen, onClose, employees, onCr
     try {
       await onCreated({
         title: title.trim(),
-        employee: parseInt(employeeId, 10),
+        employee: selectedEmpId,
         hours: parsedHours,
         status,
       });
@@ -74,7 +93,7 @@ export default function CreateAssignmentModal({ isOpen, onClose, employees, onCr
             <label htmlFor="create-employee">Assigned Employee:</label>
             <select
               id="create-employee"
-              value={employeeId}
+              value={employeeId || (employees[0]?.id || '')}
               onChange={(e) => setEmployeeId(e.target.value)}
               disabled={submitting}
             >
