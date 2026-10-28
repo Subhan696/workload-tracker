@@ -26,3 +26,10 @@ Thumbs.db
 # Database
 *.sqlite3
 db.sqlite3
+
+# Node.js and Frontend
+node_modules/
+frontend/node_modules/
+frontend/dist/
+frontend/.env.local
+.eslintcache
