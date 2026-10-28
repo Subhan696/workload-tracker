@@ -27,8 +27,11 @@ def api_logout(request):
     return redirect("/api-auth/login/?next=/api/assignments/")
 
 
+from rest_framework.authtoken.views import obtain_auth_token
+
 urlpatterns = [
     path("admin/", admin.site.urls),
+    path("api/token/", obtain_auth_token, name="api_token_auth"),
     path("api/", include("tracker.urls")),
     path("api-auth/logout/", api_logout, name="logout"),
     path("api-auth/", include("rest_framework.urls")),
